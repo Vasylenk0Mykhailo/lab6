@@ -29,5 +29,13 @@ export class CategoryService {
       { headers: { ...this.headers, 'Content-Type': 'application/json' } }
     );
   }
+  updateAllCategories(categories: Category[]): Observable<any> {
+    const binUrl = 'https://api.jsonbin.io/v3/b/67f599198a456b796685288a';
+    return this.http.put(
+      binUrl,
+      categories,
+      { headers: { ...this.headers, 'Content-Type': 'application/json' } }
+    );
+  }
   
 }

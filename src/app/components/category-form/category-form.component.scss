@@ -4,16 +4,8 @@ ion-card {
     align-items: flex-start;
     gap: 12px;
   }
-.form-container {
-    margin-top: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    padding-bottom: 100px;
-  }
-form {
-    width: 100%;
-  } 
+
+  
 .product-img {
     width: 100px;
     height: 100px;
@@ -57,16 +49,12 @@ ion-card-content p {
   }
   
 ion-button {
-    margin-top: 12px;
-    margin-bottom: 12px;
     margin: 16px 0;
     font-size: 1rem;
     --padding-start: 12px;
     --padding-end: 12px;
-    align-self: stretch;
   }
   
-
   
   @media (min-width: 480px) {
     .product-img {

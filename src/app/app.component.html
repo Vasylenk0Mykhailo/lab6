@@ -4,7 +4,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content class="ion-padding" [fullscreen]="true" scroll="true">
   <ion-card *ngFor="let product of products">
     <img class="product-img" [src]="product.imageUrl" [alt]="product.name" />
     <div class="card-content">
@@ -19,7 +19,17 @@
     </div>
   </ion-card>
 
-  <!-- Контейнер з кнопкою та формою -->
+  <div *ngFor="let category of categories">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ category.name }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-button color="danger" (click)="deleteCategory(category.id)">Видалити</ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
+  
   <div class="form-container">
     <ion-button expand="full" (click)="toggleCategoryForm()">
       {{ categoryFormVisible ? 'Сховати форму' : 'Додати категорію' }}

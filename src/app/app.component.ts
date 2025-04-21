@@ -71,4 +71,10 @@ export class AppComponent implements OnInit {
       this.cdr.detectChanges();
     });
   }
+  deleteCategory(id: string) {
+    this.categories = this.categories.filter(cat => cat.id !== id);
+    this.categoryService.updateAllCategories(this.categories).subscribe(() => {
+      this.cdr.detectChanges();
+    });
+  }  
 }
