@@ -1,0 +1,100 @@
+ion-card {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  
+.product-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+  
+  @media (min-width: 480px) {
+    .product-img {
+      width: 130px;
+      height: 130px;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .product-img {
+      width: 150px;
+      height: 150px;
+    }
+  }
+  
+  
+.card-content {
+    flex: 1;
+  }
+  
+ion-card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  
+ion-card-subtitle {
+    font-size: 0.95rem;
+    color: #555;
+  }
+  
+ion-card-content p {
+    font-size: 1rem;
+    line-height: 1.4;
+    margin: 4px 0;
+  }
+  
+ion-button {
+    margin: 16px 0;
+    font-size: 1rem;
+    --padding-start: 12px;
+    --padding-end: 12px;
+  }
+  
+.form-container {
+    margin-top: 24px;
+  }
+  
+  @media (min-width: 480px) {
+    .product-img {
+      width: 130px;
+      height: 130px;
+    }
+  
+    ion-card-title {
+      font-size: 1.3rem;
+    }
+  
+    ion-card-subtitle {
+      font-size: 1rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .product-img {
+      width: 150px;
+      height: 150px;
+    }
+  
+    ion-card-title {
+      font-size: 1.5rem;
+    }
+  
+    ion-card-subtitle {
+      font-size: 1.1rem;
+    }
+  
+    ion-card-content p {
+      font-size: 1.1rem;
+    }
+  
+    ion-button {
+      font-size: 1.1rem;
+    }
+  }
+  
