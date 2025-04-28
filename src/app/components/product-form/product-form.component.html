@@ -1,0 +1,36 @@
+<form [formGroup]="productForm" (ngSubmit)="submitForm()">
+    <ion-item>
+      <ion-label position="floating">ID Продукту</ion-label>
+      <ion-input formControlName="id"></ion-input>
+    </ion-item>
+  
+    <ion-item>
+      <ion-label position="floating">Назва Продукту</ion-label>
+      <ion-input formControlName="name"></ion-input>
+    </ion-item>
+  
+    <ion-item>
+      <ion-label position="floating">Опис</ion-label>
+      <ion-input formControlName="description"></ion-input>
+    </ion-item>
+  
+    <ion-item>
+      <ion-label position="floating">Ціна</ion-label>
+      <ion-input type="number" formControlName="price"></ion-input>
+    </ion-item>
+  
+    <ion-item>
+      <ion-label position="floating">URL Зображення</ion-label>
+      <ion-input formControlName="imageUrl"></ion-input>
+    </ion-item>
+  
+    <ion-item>
+      <ion-label position="floating">ID Категорії</ion-label>
+      <ion-input formControlName="categoryId"></ion-input>
+    </ion-item>
+  
+    <ion-button expand="block" type="submit" [disabled]="productForm.invalid">
+      Зберегти
+    </ion-button>
+  </form>
+  

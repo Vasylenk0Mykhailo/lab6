@@ -19,4 +19,23 @@ export class ProductService {
       map(res => res.record)
     );
   }
+  addProduct(newProduct: Product, existingProducts: Product[]): Observable<any> {
+    const updatedProducts = [...existingProducts, newProduct];
+    const binUrl = 'https://api.jsonbin.io/v3/b/67f599328a456b796685289c';
+
+    return this.http.put(
+      binUrl,
+      updatedProducts,
+      { headers: { ...this.headers, 'Content-Type': 'application/json' } }
+    );
+  }
+
+  updateAllProducts(products: Product[]): Observable<any> {
+    const binUrl = 'https://api.jsonbin.io/v3/b/67f599328a456b796685289c';
+    return this.http.put(
+      binUrl,
+      products,
+      { headers: { ...this.headers, 'Content-Type': 'application/json' } }
+    );
+  }
 }

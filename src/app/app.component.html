@@ -15,38 +15,38 @@
       <ion-card-content>
         <p>{{ product.description }}</p>
         <p><strong>Ціна:</strong> {{ product.price }} грн</p>
+        <ion-button color="danger" (click)="deleteProduct(product.id)">Видалити</ion-button>
+        <ion-button color="primary" (click)="toggleProductForm(product)">Редагувати</ion-button>
       </ion-card-content>
     </div>
   </ion-card>
-
+  <ion-button expand="full" (click)="toggleProductForm()">
+    {{ productFormVisible ? 'Сховати форму продукту' : 'Додати продукт' }}
+  </ion-button>
+  <ion-card *ngIf="productFormVisible" class="ion-padding">
+    <app-product-form
+      (formSubmit)="handleProductFormSubmit($event)"
+      [productToEdit]="productToEdit">
+    </app-product-form>
+  </ion-card>
   <div *ngFor="let category of categories">
     <ion-card>
       <ion-card-header>
         <ion-card-title>{{ category.name }}</ion-card-title>
       </ion-card-header>
       <ion-card-content>
+        <ion-button color="primary" (click)="toggleCategoryForm(category)">Редагувати</ion-button>
         <ion-button color="danger" (click)="deleteCategory(category.id)">Видалити</ion-button>
       </ion-card-content>
     </ion-card>
   </div>
-  
-  <div class="form-container">
-    <ion-button expand="full" (click)="toggleCategoryForm()">
-      {{ categoryFormVisible ? 'Сховати форму' : 'Додати категорію' }}
-    </ion-button>
-
-    <ion-card *ngIf="categoryFormVisible" class="ion-padding">
-      <form [formGroup]="categoryForm" (ngSubmit)="addCategory()">
-        <ion-item>
-          <ion-label position="floating">ID Категорії</ion-label>
-          <ion-input formControlName="id"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="floating">Назва Категорії</ion-label>
-          <ion-input formControlName="name"></ion-input>
-        </ion-item>
-        <ion-button expand="block" type="submit" [disabled]="categoryForm.invalid">Зберегти</ion-button>
-      </form>
-    </ion-card>
-  </div>
+  <ion-button expand="full" (click)="toggleCategoryForm()">
+    {{ categoryFormVisible ? 'Сховати форму категорії' : 'Додати категорію' }}
+  </ion-button>
+  <ion-card *ngIf="categoryFormVisible" class="ion-padding">
+    <app-category-form
+      [categoryToEdit]="categoryToEdit"
+      (formSubmit)="handleCategoryFormSubmit($event)">
+    </app-category-form>
+  </ion-card>
 </ion-content>
