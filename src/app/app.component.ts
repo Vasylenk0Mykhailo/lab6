@@ -5,15 +5,17 @@ import { CategoryService } from './services/category.service';
 import { Product } from './interfaces/product.interface';
 import { Category } from './interfaces/category.interface';
 import { CommonModule } from '@angular/common';
-import { IonHeader, IonToolbar, IonCardTitle, IonCardContent, IonCardSubtitle, IonCard, IonTitle, IonContent, IonCardHeader, IonApp, IonRouterOutlet, IonButton, IonItem, IonLabel, IonInput } from "@ionic/angular/standalone";
+import { IonHeader, IonToolbar, IonCardTitle, IonCardContent, IonCardSubtitle, IonCard, IonTitle, IonContent, IonCardHeader, IonApp, IonRouterOutlet, IonButton, IonItem, IonLabel, IonInput, IonCheckbox, IonList } from "@ionic/angular/standalone";
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ProductFormComponent } from "./components/product-form/product-form.component";
+import { FilterService } from './services/filter.service'; 
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  imports: [HttpClientModule, ReactiveFormsModule, IonHeader, IonToolbar, IonCardTitle, IonCardContent, IonCardSubtitle, IonCard, IonTitle, IonContent, IonCardHeader, CommonModule, IonButton, CategoryFormComponent, ProductFormComponent],
+  imports: [IonCheckbox, HttpClientModule, ReactiveFormsModule, IonHeader, IonToolbar, IonCardTitle, IonCardContent, IonCardSubtitle, IonCard, IonTitle, IonContent, IonCardHeader, CommonModule, IonButton, CategoryFormComponent, ProductFormComponent, IonList, IonItem, IonLabel],
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
@@ -24,12 +26,18 @@ export class AppComponent implements OnInit {
   productToEdit: Product | undefined = undefined;
   categoryForm: FormGroup;
   categoryToEdit: Category | undefined = undefined;
+  filteredProducts: Product[] = []; 
+  selectedCategoryIds: string[] = [];
+  filteredCategories: Category[] = [];
+
 
   constructor(
     private productService: ProductService,
     private categoryService: CategoryService,
     private cdr: ChangeDetectorRef,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private filterService: FilterService
+
   ) {
     this.categoryForm = this.fb.group({
     id: ['', Validators.required],
@@ -42,12 +50,16 @@ export class AppComponent implements OnInit {
     this.loadCategories();
     this.loadProducts();
   }
-  
 
   loadCategories() {
     this.categoryService.getCategories().subscribe((data) => {
       console.log('Завантажені категорії:', data);
       this.categories = data;
+      if (this.categories.length > 0) {
+        this.selectedCategoryIds = [this.categories[0].id]; 
+      }
+      this.filterProducts();
+      this.filterCategories();
       this.cdr.detectChanges();
     });
   }
@@ -56,6 +68,7 @@ export class AppComponent implements OnInit {
     this.productService.getProducts().subscribe((data) => {
       console.log('Завантажені продукти:', data);
       this.products = data;
+      this.filterProducts();
       this.cdr.detectChanges();
     });
   }
@@ -63,6 +76,7 @@ export class AppComponent implements OnInit {
   getCategoryName(categoryId: string): string {
     return this.categories.find(cat => cat.id === categoryId)?.name || 'Невідомо';
   }
+
   toggleCategoryForm(category?: Category) {
     this.categoryFormVisible = !this.categoryFormVisible;
     this.categoryToEdit = category || undefined;
@@ -77,12 +91,17 @@ export class AppComponent implements OnInit {
       this.cdr.detectChanges();
     });
   }
+
   deleteCategory(id: string) {
     this.categories = this.categories.filter(cat => cat.id !== id);
     this.categoryService.updateAllCategories(this.categories).subscribe(() => {
       this.cdr.detectChanges();
     });
+    this.selectedCategoryIds = this.selectedCategoryIds.filter(cid => cid !== id);
+    this.filterProducts();
+    this.filterCategories();
   }
+
   handleCategoryFormSubmit(category: Category) {
     if (this.categoryToEdit) {
       this.categories = this.categories.map(c =>
@@ -91,13 +110,14 @@ export class AppComponent implements OnInit {
     } else {
       this.categories.push(category);
     }
-  
+
     this.categoryService.updateAllCategories(this.categories).subscribe(() => {
       this.loadCategories();
       this.categoryFormVisible = false;
       this.categoryToEdit = undefined;
     });
   }
+
   toggleProductForm(product?: Product): void {
     if (product) {
       this.productToEdit = { ...product }; 
@@ -106,7 +126,7 @@ export class AppComponent implements OnInit {
     }
     this.productFormVisible = true;
   }
-  
+
   handleProductFormSubmit(product: Product) {
     if (this.productToEdit) {
       this.products = this.products.map(p =>
@@ -115,18 +135,49 @@ export class AppComponent implements OnInit {
     } else {
       this.products.push(product);
     }
-  
+
     this.productService.updateAllProducts(this.products).subscribe(() => {
       this.loadProducts();
       this.productFormVisible = false;
       this.productToEdit = undefined;
     });
   }
-  
+
   deleteProduct(id: string) {
     this.products = this.products.filter(p => p.id !== id);
     this.productService.updateAllProducts(this.products).subscribe(() => {
       this.loadProducts();
     });
+  }
+
+  toggleCategoryFilter(categoryId: string) {
+    const index = this.selectedCategoryIds.indexOf(categoryId);
+    if (index > -1) {
+      this.selectedCategoryIds.splice(index, 1); 
+    } else {
+      this.selectedCategoryIds.push(categoryId); 
+    }
+    this.filterProducts();
+    this.filterCategories();
+  }
+
+  filterProducts() {
+    if (this.selectedCategoryIds.length === 0) {
+      this.filteredProducts = []; 
+    } else {
+      this.filteredProducts = this.products.filter(product =>
+        this.selectedCategoryIds.includes(product.categoryId)
+      );
+    }
+  }
+
+  filterCategories() {
+    if (this.selectedCategoryIds.length === 0) {
+      this.filteredCategories = []; 
+    } else {
+      this.filteredCategories = this.categories.filter(category =>
+        this.selectedCategoryIds.includes(category.id)
+      );
+    }
   }
 }

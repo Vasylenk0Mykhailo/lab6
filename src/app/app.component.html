@@ -5,7 +5,7 @@
 </ion-header>
 
 <ion-content class="ion-padding" [fullscreen]="true" scroll="true">
-  <ion-card *ngFor="let product of products">
+  <ion-card *ngFor="let product of filteredProducts">
     <img class="product-img" [src]="product.imageUrl" [alt]="product.name" />
     <div class="card-content">
       <ion-card-header>
@@ -20,6 +20,7 @@
       </ion-card-content>
     </div>
   </ion-card>
+
   <ion-button expand="full" (click)="toggleProductForm()">
     {{ productFormVisible ? 'Сховати форму продукту' : 'Додати продукт' }}
   </ion-button>
@@ -29,7 +30,7 @@
       [productToEdit]="productToEdit">
     </app-product-form>
   </ion-card>
-  <div *ngFor="let category of categories">
+  <div *ngFor="let category of filteredCategories">
     <ion-card>
       <ion-card-header>
         <ion-card-title>{{ category.name }}</ion-card-title>
@@ -40,13 +41,33 @@
       </ion-card-content>
     </ion-card>
   </div>
+
   <ion-button expand="full" (click)="toggleCategoryForm()">
     {{ categoryFormVisible ? 'Сховати форму категорії' : 'Додати категорію' }}
   </ion-button>
+
   <ion-card *ngIf="categoryFormVisible" class="ion-padding">
     <app-category-form
       [categoryToEdit]="categoryToEdit"
       (formSubmit)="handleCategoryFormSubmit($event)">
     </app-category-form>
+  </ion-card>
+
+  <ion-card class="ion-padding">
+    <ion-card-header>
+      <ion-card-title>Фільтр за категоріями</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list>
+        <ion-item *ngFor="let category of categories">
+          <ion-checkbox
+            slot="start"
+            [checked]="selectedCategoryIds.includes(category.id)"
+            (ionChange)="toggleCategoryFilter(category.id)">
+          </ion-checkbox>
+          <ion-label>{{ category.name }}</ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
   </ion-card>
 </ion-content>
