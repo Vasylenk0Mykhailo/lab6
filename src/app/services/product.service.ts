@@ -1,41 +1,58 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Database, ref, onValue, set, update, remove } from '@angular/fire/database';
+import { BehaviorSubject } from 'rxjs';
 import { Product } from '../interfaces/product.interface';
-import { map, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductService {
-  private readonly url = 'https://api.jsonbin.io/v3/b/67f599328a456b796685289c/latest';
-  private readonly headers = {
-    'X-Master-Key': '$2a$10$/r.Tn2o.SDXCgieHySLwMuKDIbyznQ8GgZtqUPvtqoryWq2EWYBVq',
-  };
+  private readonly productsPath = '/products';
+  private productsSubject = new BehaviorSubject<Product[]>([]);
+  products$ = this.productsSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
-
-  getProducts(): Observable<Product[]> {
-    return this.http.get<{ record: Product[] }>(this.url, { headers: this.headers }).pipe(
-      map(res => res.record)
-    );
-  }
-  addProduct(newProduct: Product, existingProducts: Product[]): Observable<any> {
-    const updatedProducts = [...existingProducts, newProduct];
-    const binUrl = 'https://api.jsonbin.io/v3/b/67f599328a456b796685289c';
-
-    return this.http.put(
-      binUrl,
-      updatedProducts,
-      { headers: { ...this.headers, 'Content-Type': 'application/json' } }
-    );
+  constructor(private db: Database) {
+    this.fetchProducts();
   }
 
-  updateAllProducts(products: Product[]): Observable<any> {
-    const binUrl = 'https://api.jsonbin.io/v3/b/67f599328a456b796685289c';
-    return this.http.put(
-      binUrl,
-      products,
-      { headers: { ...this.headers, 'Content-Type': 'application/json' } }
+  private fetchProducts(): void {
+    const productsRef = ref(this.db, this.productsPath);
+    onValue(
+      productsRef,
+      (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const products = Object.keys(data).map((key) => ({
+            id: key,
+            ...data[key],
+          }));
+          // Перевіряємо, чи змінився список продуктів
+          if (JSON.stringify(this.productsSubject.getValue()) !== JSON.stringify(products)) {
+            this.productsSubject.next(products);
+          }
+        } else {
+          this.productsSubject.next([]);
+        }
+      },
+      (error) => {
+        console.error('Помилка при завантаженні продуктів:', error);
+      }
     );
+  }
+
+  addProduct(newProduct: Product): Promise<void> {
+    const productId = newProduct.id || `prod-${Date.now()}`; 
+    const productRef = ref(this.db, `${this.productsPath}/${productId}`);
+    return set(productRef, { ...newProduct, id: productId });
+  }
+
+  updateProduct(productId: string, updatedProduct: Product): Promise<void> {
+    const productRef = ref(this.db, `${this.productsPath}/${productId}`);
+    return set(productRef, updatedProduct); 
+  }
+
+  deleteProduct(productId: string): Promise<void> {
+    const productRef = ref(this.db, `${this.productsPath}/${productId}`);
+    return remove(productRef);
   }
 }

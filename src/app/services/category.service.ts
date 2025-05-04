@@ -1,41 +1,58 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Database, ref, onValue, set, update, remove } from '@angular/fire/database';
+import { BehaviorSubject } from 'rxjs';
 import { Category } from '../interfaces/category.interface';
-import { map, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CategoryService {
-  private readonly url = 'https://api.jsonbin.io/v3/b/67f599198a456b796685288a/latest';
-  private readonly headers = {
-    'X-Master-Key': '$2a$10$/r.Tn2o.SDXCgieHySLwMuKDIbyznQ8GgZtqUPvtqoryWq2EWYBVq',
-  };
+  private readonly categoriesPath = '/categories';
+  private categoriesSubject = new BehaviorSubject<Category[]>([]);
+  categories$ = this.categoriesSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private db: Database) {
+    this.fetchCategories();
+  }
 
-  getCategories(): Observable<Category[]> {
-    return this.http.get<{ record: Category[] }>(this.url, { headers: this.headers }).pipe(
-      map(res => res.record)
+  private fetchCategories(): void {
+    const categoriesRef = ref(this.db, this.categoriesPath);
+    onValue(
+      categoriesRef,
+      (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const categories = Object.keys(data).map((key) => ({
+            id: key,
+            ...data[key],
+          }));
+          // Перевіряємо, чи змінився список категорій
+          if (JSON.stringify(this.categoriesSubject.getValue()) !== JSON.stringify(categories)) {
+            this.categoriesSubject.next(categories);
+          }
+        } else {
+          this.categoriesSubject.next([]);
+        }
+      },
+      (error) => {
+        console.error('Помилка при завантаженні категорій:', error);
+      }
     );
   }
-  addCategory(newCategory: Category, existingCategories: Category[]): Observable<any> {
-    const updatedCategories = [...existingCategories, newCategory];
-    const binUrl = 'https://api.jsonbin.io/v3/b/67f599198a456b796685288a'; 
-  
-    return this.http.put(
-      binUrl,
-      updatedCategories,
-      { headers: { ...this.headers, 'Content-Type': 'application/json' } }
-    );
+
+  addCategory(newCategory: Category): Promise<void> {
+    const categoryId = newCategory.id || `cat_${Date.now()}`; 
+    const categoryRef = ref(this.db, `${this.categoriesPath}/${categoryId}`);
+    return set(categoryRef, { ...newCategory, id: categoryId });
   }
-  updateAllCategories(categories: Category[]): Observable<any> {
-    const binUrl = 'https://api.jsonbin.io/v3/b/67f599198a456b796685288a';
-    return this.http.put(
-      binUrl,
-      categories,
-      { headers: { ...this.headers, 'Content-Type': 'application/json' } }
-    );
+
+  updateCategory(categoryId: string, updatedCategory: Category): Promise<void> {
+    const categoryRef = ref(this.db, `${this.categoriesPath}/${categoryId}`);
+    return set(categoryRef, updatedCategory); 
   }
-  
+
+  deleteCategory(categoryId: string): Promise<void> {
+    const categoryRef = ref(this.db, `${this.categoriesPath}/${categoryId}`);
+    return remove(categoryRef);
+  }
 }

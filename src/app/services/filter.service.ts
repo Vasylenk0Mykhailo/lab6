@@ -7,34 +7,36 @@ import { ProductService } from './product.service';
   providedIn: 'root',
 })
 export class FilterService {
-  private selectedCategoryIds$ = new BehaviorSubject<string[]>([]);
-  private products$ = this.productService.getProducts(); 
+  private selectedCategoryIds$ = new BehaviorSubject<string[]>([]); 
+  private products$ = this.productService.products$; 
 
   constructor(private productService: ProductService) {}
 
-  setCategories(categoryIds: string[]) {
+  setCategories(categoryIds: string[]): void {
     this.selectedCategoryIds$.next(categoryIds);
   }
 
-  addCategory(categoryId: string) {
+  addCategory(categoryId: string): void {
     const current = this.selectedCategoryIds$.getValue();
     if (!current.includes(categoryId)) {
       this.selectedCategoryIds$.next([...current, categoryId]);
     }
   }
 
-  removeCategory(categoryId: string) {
+  removeCategory(categoryId: string): void {
     const current = this.selectedCategoryIds$.getValue();
-    this.selectedCategoryIds$.next(current.filter(id => id !== categoryId));
+    this.selectedCategoryIds$.next(current.filter((id) => id !== categoryId));
   }
 
   getFilteredProducts(): Observable<Product[]> {
     return combineLatest([this.products$, this.selectedCategoryIds$]).pipe(
       map(([products, selectedCategoryIds]) => {
-        if (selectedCategoryIds.length === 0) {
+        if (!selectedCategoryIds || selectedCategoryIds.length === 0) {
           return []; 
         }
-        return products.filter(product => selectedCategoryIds.includes(product.categoryId));
+        return products.filter((product: Product) =>
+          selectedCategoryIds.includes(product.categoryId)
+        );
       })
     );
   }
