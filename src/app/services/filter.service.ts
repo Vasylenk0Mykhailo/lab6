@@ -8,7 +8,7 @@ import { ProductService } from './product.service';
 })
 export class FilterService {
   private selectedCategoryIds$ = new BehaviorSubject<string[]>([]);
-  private products$ = this.productService.getProducts();
+  private products$ = this.productService.getProducts(); 
 
   constructor(private productService: ProductService) {}
 
